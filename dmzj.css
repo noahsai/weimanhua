@@ -1,0 +1,7 @@
+.ovfHiden,html{
+overflow:scroll!important;
+}
+
+.timeAD,.ADImg,.AppDs,.time_download,.mark,.app_home_ad,.app_home,.app_text,.app_btn,.app_btn_look,.app_btn_home,.bottomDown,#khdDown,a[onclick*="openApp"]{
+display:none!important;
+}

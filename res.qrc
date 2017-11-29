@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/icon">
+        <file>dl.png</file>
+        <file>err.png</file>
+        <file>fin.png</file>
+        <file>ready.png</file>
+        <file>stop.png</file>
+    </qresource>
+    <qresource prefix="/css">
+        <file>dmzj.css</file>
+        <file>fzdm.css</file>
+    </qresource>
+</RCC>
