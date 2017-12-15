@@ -17,3 +17,8 @@
 【注意1】不要登录DMZJ，我发现登陆后自带的浏览器就不能看DMZJ的漫画了，加上我并没有做cookie的保存。所以就别登录。
 
 【注意2】虽然我已经尽力debug掉自己发现的问题了，但是以我的渣码水平，还是别暴力操作为好。
+
+![截图](https://github.com/noahsai/weimanhua/raw/master/截图/1.png)
+![截图](https://github.com/noahsai/weimanhua/raw/master/截图/2.png)
+![截图](https://github.com/noahsai/weimanhua/raw/master/截图/3.png)
+![截图](https://github.com/noahsai/weimanhua/raw/master/截图/4.png)
