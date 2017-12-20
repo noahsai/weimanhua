@@ -33,8 +33,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabWidget->setCurrentIndex(0);
     ui->browser->setBackgroundRole(QPalette::Background);
     ui->browser->setAutoFillBackground(true);
-    ui->webView->load(QUrl("http://manhua.fzdm.com/"));
+     jar = new mycookiejar();
+     ui->webView->page()->networkAccessManager()->setCookieJar(jar);
     ui->webView->settings()->setUserStyleSheetUrl(QUrl("qrc:/css/fzdm.css"));
+     ui->webView->settings()->enablePersistentStorage(cfgpath);
+     ui->webView->settings()->setAttribute(QWebSettings::LocalStorageEnabled,true);
+    ui-> webView->settings()->setLocalStoragePath(cfgpath);
+    connect( ui-> webView ,SIGNAL(loadFinished(bool)),this,SLOT(savecookie()));
+    readcookie();
+    ui->webView->load(QUrl("http://manhua.fzdm.com/"));
    readlist(true);//读取正在下载列表
    readlist(false);//读取已完成列表
     initlist = false;//下载列表读完后就没用了
@@ -899,4 +906,59 @@ void MainWindow::on_move_error_clicked()
         checkfin();
     }
 
+}
+
+
+
+void MainWindow::savecookie()
+{
+  //  jar =  webview.page()->networkAccessManager()->cookieJar();
+   QList  <QNetworkCookie  >   list =jar->getallCookies();
+ //  qDebug()<<list.length()<<list;
+   QFile file(cfgpath+"cookie.save");
+   file.open(QIODevice::WriteOnly);
+   QTextStream  data(&file);
+   foreach (QNetworkCookie one, list) {
+       data<<one.toRawForm()<<endl;
+   }
+   //data<<list;
+   file.close();
+}
+
+void MainWindow::readcookie()
+{
+   QFile file(cfgpath+"cookie.save");
+  if( file.open(QIODevice::ReadOnly)){
+        QTextStream  data(&file);
+        QString t;
+        QStringList list;
+        while(!data.atEnd())
+        {
+            t = data.readLine();
+            list = t.split("; ");
+            QNetworkCookie cookie;
+            for(int i=0;i<list.length();i++){
+                QString name = list.at(i);
+                 QString value;
+                QStringList l = name.split("=");
+                for(int j =0;j<l.length();j++){
+                    if(j==0) name = l.at(0);
+                    if(j==1) value  = l.at(1);
+                }
+                if(name=="domain") cookie.setDomain(value);
+                else    if(name=="expires") cookie.setExpirationDate(QDateTime().fromString(value));
+                else      if(name=="path") cookie.setPath(value);
+                else  if(name == "HttpOnly") cookie.setHttpOnly( true);
+               else {
+                    cookie.setName( name.toLatin1());
+                     cookie.setValue( value.toLatin1());
+                //   qDebug()<<"zidingyi"<<name<<value<<cookie;
+                }
+            }
+         //   qDebug()<<cookie<<endl;
+            jar->insertCookie(cookie);
+          //  qDebug()<<"readcookie:"<<list;
+        }
+        file.close();
+    }
 }

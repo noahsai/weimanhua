@@ -26,11 +26,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    downyiji.cpp
+    downyiji.cpp \
+    mycookiejar.cpp
 
 HEADERS += \
         mainwindow.h \
-    downyiji.h
+    downyiji.h \
+    mycookiejar.h
 
 FORMS += \
         mainwindow.ui

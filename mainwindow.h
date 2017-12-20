@@ -14,6 +14,9 @@
 #include<QJsonObject>
 #include<QJsonParseError>
 #include<QJsonArray>
+#include<QNetworkCookie>
+#include<mycookiejar.h>
+
 struct Taskitem
 {
     QString name;
@@ -62,6 +65,8 @@ public:
 signals:
 
 private slots:
+    void savecookie();
+    void readcookie();
     void downinfo(QString text , QString& url);
     void downfinished( QString& url);
     void downstoped();
@@ -149,6 +154,7 @@ private:
     bool initlist;
     int mverror;
     QString tmpdmzjurl;
+    mycookiejar* jar ;
 };
 
 #endif // MAINWINDOW_H

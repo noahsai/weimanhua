@@ -24,7 +24,7 @@ class downyiji : public QObject
 {
     Q_OBJECT
 public:
-    explicit downyiji(QObject *parent = nullptr    );
+    explicit downyiji(QObject *parent = NULL    );
     void seturl(QString Url ,QString Path);
     //用不到自定义referer和ua
 //    void setrefer(QString Referer);
