@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->browser->setBackgroundRole(QPalette::Background);
     ui->browser->setAutoFillBackground(true);
      jar = new mycookiejar();
+     ui->webView->installEventFilter(this);//注册
      ui->webView->page()->networkAccessManager()->setCookieJar(jar);
     ui->webView->settings()->setUserStyleSheetUrl(QUrl("qrc:/css/fzdm.css"));
      ui->webView->settings()->enablePersistentStorage(cfgpath);
@@ -41,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui-> webView->settings()->setLocalStoragePath(cfgpath);
     connect( ui-> webView ,SIGNAL(loadFinished(bool)),this,SLOT(savecookie()));
     readcookie();
+
     ui->webView->load(QUrl("http://manhua.fzdm.com/"));
    readlist(true);//读取正在下载列表
    readlist(false);//读取已完成列表
@@ -823,15 +825,32 @@ void MainWindow::on_webView_urlChanged(const QUrl &arg1)
 }
 
 
-void MainWindow::wheelEvent(QWheelEvent *event){
-    if(ui->tabWidget->currentIndex()==0){
-        if(event->delta() > 0){
-             ui->tabWidget->tabBar()->setVisible(true);
-         }else{
-            ui->tabWidget->tabBar()->setVisible(false);
-         }
+//void MainWindow::wheelEvent(QWheelEvent *event){
+//    if(ui->tabWidget->currentIndex()==0){
+//        if(event->delta() > 0){
+//             ui->tabWidget->tabBar()->setVisible(true);
+//         }else{
+//            ui->tabWidget->tabBar()->setVisible(false);
+//         }
+//    }
+//    else ui->tabWidget->tabBar()->setVisible(true);
+//}
+
+bool MainWindow::eventFilter(QObject *object, QEvent *event){
+    qDebug()<<"eventfilter";
+    if( event->type() == QEvent::Wheel){
+
+        QWheelEvent* e = static_cast<QWheelEvent*>(event);//强制转型
+        if(ui->tabWidget->currentIndex()==0){
+            if(e->delta() > 0){
+                 ui->tabWidget->tabBar()->setVisible(true);
+             }else{
+                ui->tabWidget->tabBar()->setVisible(false);
+             }
+        }
     }
-    else ui->tabWidget->tabBar()->setVisible(true);
+    return false;//还需要原目标处理
+    //event处理后返回true表示已经处理该事件，返回false则qt会将event发给原目标
 }
 
 void MainWindow::on_backpage_clicked()

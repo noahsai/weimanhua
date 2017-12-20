@@ -135,7 +135,8 @@ private:
     QListWidgetItem* findfinitem(QString& url);
     downyiji* finddownloader( QString url = QString());
 
-    void wheelEvent(QWheelEvent *event);
+  //  void wheelEvent(QWheelEvent *event);
+    bool eventFilter(QObject *, QEvent *);
 
     QNetworkAccessManager manager,viewmanager;
     QNetworkReply *reply;
