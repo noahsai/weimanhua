@@ -99,6 +99,7 @@ void downyiji::init(){
 
 void downyiji::getpagesinfo(QString url){
     if(tostop) return;
+    if(url.indexOf("dmzj") != -1 ) url.replace("http://" , "https://");
     QNetworkRequest request;
     request.setRawHeader(QByteArray("User-Agent"), ua.toLatin1());
     request.setRawHeader(QByteArray("Referer"), url.toLatin1());
@@ -113,6 +114,7 @@ void  downyiji::getimginfo(QString pageurl){
     if(tostop) return;
 //    cookiejar = new QNetworkCookieJar;
 //    manager.setCookieJar(cookiejar);
+    if(pageurl.indexOf("dmzj") != -1 ) pageurl.replace("http://" , "https://");
     QNetworkRequest request;
     request.setRawHeader(QByteArray("User-Agent"), ua.toLatin1());
     request.setRawHeader(QByteArray("Referer"), url.toLatin1());
@@ -317,7 +319,7 @@ void  downyiji::getdmzjimgsurl( ){
         downing = false;
         savecfg();
         emit error(url);
-        qDebug()<<"getimgurl() error";
+        qDebug()<<"getimgurl() error"<<html;
         return;
     }
     QString data = match.captured();

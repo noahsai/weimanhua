@@ -5,6 +5,7 @@
         <file>fin.png</file>
         <file>ready.png</file>
         <file>stop.png</file>
+        <file>weimanhua.png</file>
     </qresource>
     <qresource prefix="/css">
         <file>dmzj.css</file>

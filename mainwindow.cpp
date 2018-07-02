@@ -44,8 +44,8 @@ MainWindow::MainWindow(QWidget *parent) :
     readcookie();
 
     ui->webView->load(QUrl("http://manhua.fzdm.com/"));
-   readlist(true);//读取正在下载列表
-   readlist(false);//读取已完成列表
+    readlist(true);//读取正在下载列表
+    readlist(false);//读取已完成列表
     initlist = false;//下载列表读完后就没用了
 }
 
@@ -837,9 +837,8 @@ void MainWindow::on_webView_urlChanged(const QUrl &arg1)
 //}
 
 bool MainWindow::eventFilter(QObject *object, QEvent *event){
-    qDebug()<<"eventfilter";
     if( event->type() == QEvent::Wheel){
-
+        //qDebug()<<"eventfilter:Wheel";
         QWheelEvent* e = static_cast<QWheelEvent*>(event);//强制转型
         if(ui->tabWidget->currentIndex()==0){
             if(e->delta() > 0){
