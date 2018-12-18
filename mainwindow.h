@@ -156,6 +156,7 @@ private:
     int mverror;
     QString tmpdmzjurl;
     mycookiejar* jar ;
+    QUrl dmzjcss,fzdmcss;
 };
 
 #endif // MAINWINDOW_H

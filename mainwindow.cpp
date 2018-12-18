@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
      jar = new mycookiejar();
      ui->webView->installEventFilter(this);//注册
      ui->webView->page()->networkAccessManager()->setCookieJar(jar);
-    ui->webView->settings()->setUserStyleSheetUrl(QUrl("qrc:/css/fzdm.css"));
+    ui->webView->settings()->setUserStyleSheetUrl(fzdmcss);
      ui->webView->settings()->enablePersistentStorage(cfgpath);
      ui->webView->settings()->setAttribute(QWebSettings::LocalStorageEnabled,true);
     ui-> webView->settings()->setLocalStoragePath(cfgpath);
@@ -58,6 +58,14 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::init(){
+    QFile file(cfgpath+"dmzj.css");
+    if(file.exists()) dmzjcss = dmzjcss.fromLocalFile(cfgpath+"dmzj.css");
+    else dmzjcss.setUrl("qrc:/css/dmzj.css");
+
+    file.setFileName(cfgpath+"fzdm.css");
+    if(file.exists()) fzdmcss = fzdmcss.fromLocalFile(cfgpath+"fzdm.css");
+    else fzdmcss.setUrl("qrc:/css/fzdm.css");
+
     for(int i=0;i < 2;i++){
         downyiji  *down =new downyiji(this);
         connect(down,SIGNAL(error(QString&)),this,SLOT(error(QString&)));
@@ -882,13 +890,13 @@ void MainWindow::on_down_in_web_clicked()
 void MainWindow::on_fzdm_clicked()
 {
     ui->webView->load(QUrl("http://manhua.fzdm.com"));
-    ui->webView->settings()->setUserStyleSheetUrl(QUrl("qrc:/css/fzdm.css"));
+    ui->webView->settings()->setUserStyleSheetUrl(fzdmcss);
 }
 
 void MainWindow::on_dmzj_clicked()
 {
     ui->webView->load(QUrl("http://m.dmzj.com"));
-    ui->webView->settings()->setUserStyleSheetUrl(QUrl("qrc:/css/dmzj.css"));
+    ui->webView->settings()->setUserStyleSheetUrl(dmzjcss);
 
 
 }
