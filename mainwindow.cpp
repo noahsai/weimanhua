@@ -140,17 +140,18 @@ void MainWindow::getlist(){
    matched  = reg.match(html);
    if(matched.hasMatch())
    {
+       qDebug()<<"列表";
        //booklist.clear();
        //bookurl = "";
        QString name = matched.captured();
-       //qDebug()<<name;
        reg.setPattern("(?<=content=[\"']).+?(?=[\"'])");
        matched = reg.match(name);
        if(matched.hasMatch()) name = matched.captured();
        else name = url;
        name = name.remove("/");//因为有可能做路径
+       qDebug()<<name;
        ui->tabWidget->setTabText(ui->tabWidget->indexOf(ui->all_list),name);
-       reg.setPattern("<li [\\s\\S]+</li>");
+       reg.setPattern("id=\"mhlistad\"[\\s\\S]+</li>");
        matched = reg.match(html);
        QString match ;
        if(matched.hasMatch())       match = matched.captured();
@@ -172,13 +173,13 @@ void MainWindow::getlist(){
                reg.setPattern("\".+\"");
                tmp1 = i.captured().split(reg).at(0);//href
                tmp2 = i.captured().split(reg).at(1);//title
-                   item = new QListWidgetItem(ui->alllist);
-                   item->setText(tmp2);//name
-                   item->setToolTip(tmp2);
-                   item->setWhatsThis(url + tmp1);//url
-                   item->setSizeHint(QSize(100,24));
-                   item->setTextAlignment(Qt::AlignCenter);
-                   ui->alllist->addItem(item);
+               item = new QListWidgetItem(ui->alllist);
+               item->setText(tmp2);//name
+               item->setToolTip(tmp2);
+               item->setWhatsThis(url + tmp1);//url
+               item->setSizeHint(QSize(100,24));
+               item->setTextAlignment(Qt::AlignCenter);
+               ui->alllist->addItem(item);
            }
            ui->tabWidget->setCurrentWidget(ui->all_list);
            ui->tabWidget->tabBar()->setVisible(true);
@@ -192,7 +193,7 @@ void MainWindow::getlist(){
       {
           qDebug()<<"单集";
           QString name = matched.captured();
-          //qDebug()<<name;
+          qDebug()<<name;
           reg.setPattern("(?<=content=[\"']).+?(?=[\"'])");
           matched = reg.match(name);
           if(matched.hasMatch()) name = matched.captured();
@@ -203,7 +204,7 @@ void MainWindow::getlist(){
           task.path = downpath + name+"/";
           task.url = url;
           task.ua = user_agent;
-         qDebug()<<task.name<<task.url<<task.path;
+          qDebug()<<task.name<<task.url<<task.path;
 
           addtask(task ,true);
           checkfin();
@@ -336,7 +337,8 @@ void MainWindow::addtask(Taskitem t,bool saveinglist)
     else {
         item->setIcon(QIcon(":/icon/fin.png"));
         item->setWhatsThis("fin");
-        ui->finlist->addItem(item);
+        //ui->finlist->addItem(item); //新的放后面
+        ui->finlist->insertItem(0,item); //新的放前面
     }
 
 
@@ -395,7 +397,8 @@ void MainWindow::checkfin(){
         if(item->whatsThis()=="fin"||(mverror==-1&&item->whatsThis()=="error")){
             int r = ui->inglist->row(item);
             item = ui->inglist->takeItem(r);
-            ui->finlist->addItem(item);
+            //ui->finlist->addItem(item); //新的放后面
+            ui->finlist->insertItem(0,item); //新的放前面
             all--;
             i--;
             if(mverror==-1&&item->whatsThis()=="error") mverror = 0;
@@ -895,7 +898,7 @@ void MainWindow::on_fzdm_clicked()
 
 void MainWindow::on_dmzj_clicked()
 {
-    ui->webView->load(QUrl("http://m.dmzj.com"));
+    ui->webView->load(QUrl("https://m.dmzj.com/latest.html"));
     ui->webView->settings()->setUserStyleSheetUrl(dmzjcss);
 
 
