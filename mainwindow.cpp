@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect( ui-> webView ,SIGNAL(loadFinished(bool)),this,SLOT(savecookie()));
     readcookie();
 
-    ui->webView->load(QUrl("http://manhua.fzdm.com/"));
+    ui->webView->load(QUrl("http://comic2.kukudm.com/"));
     readlist(true);//读取正在下载列表
     readlist(false);//读取已完成列表
     initlist = false;//下载列表读完后就没用了
@@ -116,8 +116,10 @@ void MainWindow::getlistinfo(QString url)
     reply = manager.get(request);
     if(url.indexOf("dmzj")!=-1)
         connect(reply,SIGNAL(finished()),this,SLOT(getdmzjlist()));
-    else connect(reply,SIGNAL(finished()),this,SLOT(getlist()));
-
+    else if(url.indexOf("fzdm")!=-1)
+        connect(reply,SIGNAL(finished()),this,SLOT(getlist()));
+    else
+        connect(reply,SIGNAL(finished()),this,SLOT(getkukulist()));
     qDebug()<<"getlistinfo started";
 }
 
@@ -227,7 +229,7 @@ void MainWindow::getdmzjlist(){
     QString url = reply->url().toString();
     reply->deleteLater();
     QRegularExpressionMatch matched;
-    qDebug()<<html;
+    //qDebug()<<html;
     reg.setPattern("(?<=comicName\">).+?(?=<)");
    matched  = reg.match(html);
    qDebug()<<"dmzj:"<<matched.captured();
@@ -308,6 +310,78 @@ void MainWindow::getdmzjlist(){
       }
    }
 
+}
+
+
+void MainWindow::getkukulist(){
+    //需要找到漫画名，然后列表里去除漫画名字
+
+    if(reply->hasRawHeader("Location")){
+        reply->deleteLater();
+        QString url(reply->rawHeader("Location"));
+        getlistinfo( url)  ;
+        ui->lineEdit->setText(url);
+        return;
+    }
+    QTextCodec *codec = QTextCodec::codecForName("GBK");
+    QByteArray data = reply->readAll();
+    QString html = codec->toUnicode( data);
+    QString url = reply->url().toString();
+    url = url.remove(QRegularExpression("(?<=[^/])/[^/].+"));
+    qDebug()<<"kuku-url:"<<url;
+    reply->deleteLater();
+    QRegularExpressionMatch matched;
+    //qDebug()<<html;
+    reg.setPattern("(?<=<title>).+(?=漫画在线_)");
+    matched = reg.match(html);
+
+    if(matched.hasMatch())
+    {
+        QString name = matched.captured();
+        if(name.isEmpty())  name = url;
+        name = name.remove("/");//因为有可能做路径
+        qDebug()<<name;
+        ui->tabWidget->setTabText(ui->tabWidget->indexOf(ui->all_list),name);
+        reg.setPattern("<dl id='comiclistn'>.+?</dl>");
+        matched = reg.match(html);
+        if(matched.hasMatch())
+        {
+            html = matched.captured(0);
+            html = html.remove(QRegularExpression(name+" "));//由于这个网站命名有点杂，只去除名字+空格的算了
+            html = html.remove(name);//再去除一次名字，因为有些官方同人
+            reg.setPattern("(?<=')/.+?(?=</A>)");
+
+            QRegularExpressionMatchIterator  matchs=  reg.globalMatch(html);
+
+            if(matchs.hasNext()){
+                ui->alllist->clear();
+                QString tmp1;
+                QString tmp2;
+                QListWidgetItem *item ;
+                while(matchs.hasNext()){
+                    QRegularExpressionMatch i = matchs.next();
+                    tmp1 = "";
+                    tmp2 = "";
+                    reg.setPattern("'.+?>");
+                    tmp1 = i.captured().split(reg).at(0);//href
+                    tmp2 = i.captured().split(reg).at(1);//title
+                    item = new QListWidgetItem(ui->alllist);
+                    item->setText(tmp2);//name
+                    item->setToolTip(tmp2);
+                    item->setWhatsThis(url + tmp1);//url
+                    item->setSizeHint(QSize(100,24));
+                    item->setTextAlignment(Qt::AlignCenter);
+                    ui->alllist->addItem(item);
+                }
+                ui->tabWidget->setCurrentWidget(ui->all_list);
+                ui->tabWidget->tabBar()->setVisible(true);
+            }
+        }
+    }
+    else{
+        //下载单集
+
+    }
 }
 
 void MainWindow::addtask(Taskitem t,bool saveinglist)

@@ -16,7 +16,7 @@
 #include<QJsonArray>
 #include<QNetworkCookie>
 #include<mycookiejar.h>
-
+#include <QTextCodec>>
 struct Taskitem
 {
     QString name;
@@ -74,6 +74,7 @@ private slots:
 
     void getlist();
     void getdmzjlist();
+    void getkukulist();
 
     void on_analyze_clicked();
 

@@ -20,6 +20,9 @@
 #include<QJsonParseError>
 #include<QMimeDatabase>
 #include<QMimeType>
+#include<QMap>
+#include <QTextCodec>
+
 class downyiji : public QObject
 {
     Q_OBJECT
@@ -75,7 +78,7 @@ private:
     //====
     QRegularExpression reg;
     QFile *file;
-
+    QString kukuurl;
 };
 
 #endif // DOWNYIJI_H

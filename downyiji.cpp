@@ -9,7 +9,7 @@ downyiji::downyiji( QObject *parent ) : QObject(parent)
     tostop = false;
     errored = 0;
     ua = "Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.76 Mobile Safari/537.36";
-
+    kukuurl = "http://n9.1whour.com/";
 }
 
 
@@ -105,7 +105,7 @@ void downyiji::getpagesinfo(QString url){
     request.setRawHeader(QByteArray("Referer"), url.toLatin1());
     request.setUrl(QUrl(url));
     reply = manager.get(request);
-    if(url.indexOf("fzdm")!=-1)    connect(reply,SIGNAL(finished()),this,SLOT(getpages()));
+    if(url.indexOf("fzdm")!=-1 ||url.indexOf("kukudm")!=-1 )    connect(reply,SIGNAL(finished()),this,SLOT(getpages()));
     else      connect(reply,SIGNAL(finished()),this,SLOT(getdmzjimgsurl()));
     qDebug()<<"getpagesinfo started";
 }
@@ -130,10 +130,11 @@ void downyiji::downimg(QString imgurl){
     QNetworkRequest request;
     request.setUrl(QUrl(imgurl));
     request.setRawHeader(QByteArray("User-Agent"), ua.toLatin1());
-    request.setRawHeader(QByteArray("Referer"), url.toLatin1());
+    if(imgurl.indexOf("kuku")!=-1)     request.setRawHeader(QByteArray("Referer"), QString(list[now]).toLatin1());
+    else request.setRawHeader(QByteArray("Referer"), url.toLatin1());
      reply = manager.get(request);
     connect(reply,SIGNAL(finished()),this,SLOT(getimg()));
-    qDebug()<<"downimg started";
+    qDebug()<<"downimg started"<<now<<list[now];
 
 }
 
@@ -229,6 +230,7 @@ void downyiji::savecfg(){
 
 void  downyiji::getpages(){
     qDebug()<<"downyiji::getpages";
+    QString url = reply->url().toString();
     if(reply->error()!=QNetworkReply::NoError) {
         downing = false;
         savecfg();
@@ -236,34 +238,61 @@ void  downyiji::getpages(){
         qDebug()<<"getpages() error";
         return;
     }
-    QString html = reply->readAll();
-   // qDebug()<<html;
+    QByteArray data = reply->readAll();
+    QString html(data);
+   //qDebug()<<html;
+
     reply->deleteLater();
     reply = NULL;
-    reg.setPattern("\"navigation\">[\\s\\S]+?</div>");
-    QString match =  reg.match(html).captured();
-    //qDebug()<<"match"<<match;
-    reg.setPattern("(?<=href=['\"]).+?(?=[\"'])");
-    QRegularExpressionMatchIterator  matchs=  reg.globalMatch(match);
-      while(matchs.hasNext()){
-        QRegularExpressionMatch i = matchs.next();
-        QString tmp = i.captured();
-        if(tmp.indexOf(QString(".."))!=-1) continue;
-        if(list.indexOf(url+i.captured())==-1)        list.append(url + i.captured());//低效疯狂对比，只加入不存在的
-       // qDebug() <<i.captured();
+    if(url.indexOf("fzdm")!=-1)
+    {
+        reg.setPattern("\"navigation\">[\\s\\S]+?</div>");
+        QString match =  reg.match(html).captured();
+        //qDebug()<<"match"<<match;
+        reg.setPattern("(?<=href=['\"]).+?(?=[\"'])");
+        QRegularExpressionMatchIterator  matchs=  reg.globalMatch(match);
+          while(matchs.hasNext()){
+            QRegularExpressionMatch i = matchs.next();
+            QString tmp = i.captured();
+            if(tmp.indexOf(QString(".."))!=-1) continue;
+            if(list.indexOf(url+i.captured())==-1)        list.append(url + i.captured());//低效疯狂对比，只加入不存在的
+           // qDebug() <<i.captured();
+        }
+        if(html.indexOf("最后一页了")!=-1){
+        now = 0;
+        all = list.length();
+        //qDebug()<<"getpagesinfo end"<<list;
+        qDebug()<<"now/all:"<<now<<"/"<<all;
+        savecfg();
+        checkfin();
+        }else{
+        qDebug()<<"list.last():"<<list.last();
+        qDebug()<<"查找最后一页";
+          getpagesinfo(list.last());//不断翻页，找到最后一页
+        }
     }
-  if(html.indexOf("最后一页了")!=-1){
-    now = 0;
-    all = list.length();
-    qDebug()<<"getpagesinfo end"<<list;
-    qDebug()<<"now/all:"<<now<<"/"<<all;
-    savecfg();
-    checkfin();
-  }else{
-    qDebug()<<"list.last():"<<list.last();
-    qDebug()<<"查找最后一页";
-      getpagesinfo(list.last());//不断翻页，找到最后一页
-  }
+    else {
+        QTextCodec *codec = QTextCodec::codecForName("GBK");
+        html = codec->toUnicode( data);
+        //是kuku，但不是js数据
+        reg.setPattern("(?<=共)\\d+(?=页)");
+        html = reg.match(html).captured(0);
+        qDebug()<<html;
+        if(!html.isEmpty()){
+            now =0 ;
+            all = html.toInt();
+            for(int i =0 ;i<all;i++)
+            {
+                url = url.replace(QRegularExpression("(?<=/)[^/]+(?=.htm)"),QString().setNum(i+1));
+                list.append(url);
+            }
+            qDebug()<<"now/all:"<<now<<"/"<<all;
+            savecfg();
+            checkfin();
+        }
+    }
+
+
 }
 
 void  downyiji::getimgurl( ){
@@ -272,7 +301,11 @@ void  downyiji::getimgurl( ){
         haserror();
         return;
     }
-    QString html = reply->readAll();
+    QString url = reply->url().toString();
+    QByteArray data = reply->readAll();
+    QString html(data);
+    reply->deleteLater();
+    reply = NULL;
     //qDebug()<<html;
     //QList<QNetworkCookie> cookies =manager.cookieJar()->cookiesForUrl(reply->url());
     //QStringList cook;
@@ -282,26 +315,44 @@ void  downyiji::getimgurl( ){
 //    reg.setPattern("picHost.+");
 //    qDebug()<<cook;
 //    QString mhss = cook.at(cook.indexOf(reg));
-     QString mhss ="";//不搞cookie了，直接为空；
-    reply->deleteLater();
-    reply = NULL;
-    html.replace(" ","");
-    reg.setPattern("(?<=mhurl=['\"]).+?(?=[\"'])");
-    QString mhurl =  reg.match(html).captured();
+    if(url.indexOf("fzdm")!=-1)
+    {
+         QString mhss ="";//不搞cookie了，直接为空；
 
-    reg.setPattern("(?<=mhss=['\"]).+?(?=[\"'])");
-     if(mhss=="") mhss= reg.match(html).captured();
-     if(mhurl.indexOf("2015")!=-1||mhurl.indexOf("2016")!=-1||mhurl.indexOf("2017")!=-1||mhurl.indexOf("2018")!=-1){
-     }else{
-     mhss=mhss.replace("p1","p0");
-     };
-     QString mhpicurl="http://"+mhss+"/"+mhurl;
-     if(mhurl.indexOf("http")!=-1){
-     mhpicurl=mhurl;
-     }
-     qDebug()<<"img url:"<<mhpicurl;
+        html.replace(" ","");
+        reg.setPattern("(?<=mhurl=['\"]).+?(?=[\"'])");
+        QString mhurl =  reg.match(html).captured();
 
-     downimg(mhpicurl);
+        reg.setPattern("(?<=mhss=['\"]).+?(?=[\"'])");
+         if(mhss=="") mhss= reg.match(html).captured();
+         if(mhurl.indexOf("2015")!=-1||mhurl.indexOf("2016")!=-1||mhurl.indexOf("2017")!=-1||mhurl.indexOf("2018")!=-1){
+         }else{
+         mhss=mhss.replace("p1","p0");
+         };
+         QString mhpicurl="http://"+mhss+"/"+mhurl;
+         if(mhurl.indexOf("http")!=-1){
+         mhpicurl=mhurl;
+         }
+         qDebug()<<"img url:"<<mhpicurl;
+
+         downimg(mhpicurl);
+    }
+    else {
+        //kuku
+        QTextCodec *codec = QTextCodec::codecForName("GBK");
+        html = codec->toUnicode( data);
+        reg.setPattern("(?<=\"\\+).+?(?=')");
+        QString imgurl = reg.match(html).captured(0);
+        if(!imgurl.isEmpty()){
+            QStringList list = imgurl.split("+\"");
+
+            if(list.length()>1) {
+                imgurl = kukuurl + list.at(1);
+                qDebug()<<"kukuimg url:"<<imgurl;
+                downimg(imgurl);
+            }
+        }
+    }
 
 }
 

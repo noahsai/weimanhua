@@ -24,6 +24,14 @@ padding-left:6px;
 border-bottom-left-radius: 12px 12px;
 border-top-left-radius: 12px 12px;
 }
+#dmzj,#fzdm,#kuku
+{
+padding:2px;
+height:24px;
+border:1px solid #cccccc;
+border-radius: 6px;
+}
+
 #analyze{
 border:1px solid #cccccc;
 border-bottom-right-radius: 12px 12px;
@@ -51,12 +59,7 @@ border:1px solid #cccccc;
 border-radius: 12px;
 }
 
-#dmzj,#fzdm{
-padding:2px;
-height:24px;
-border:1px solid #cccccc;
-border-radius: 6px;
-}
+
 #inglist , #alllist , #finlist{
 background-color: rgb(255, 255, 255);
 padding:2px;
@@ -263,6 +266,22 @@ color:white;
                </spacer>
               </item>
               <item>
+               <widget class="QPushButton" name="kuku">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>m.dmzj.com</string>
+                </property>
+                <property name="text">
+                 <string>KuKu漫画</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QPushButton" name="fzdm">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -377,7 +396,7 @@ color:white;
                <widget class="QPushButton" name="analyze">
                 <property name="minimumSize">
                  <size>
-                  <width>40</width>
+                  <width>0</width>
                   <height>24</height>
                  </size>
                 </property>
